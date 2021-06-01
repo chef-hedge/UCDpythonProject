@@ -1,16 +1,15 @@
-# This is a sample Python script.
+# Importing necessary packages
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib as plt
 
+# Import data and check for integrity
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+data_07_10 = pd.read_csv('Air_Traffic_Passenger_Statistics_07-10.csv')
+data_17_20 = pd.read_csv('Air_Traffic_Passenger_Statistics_17-20.csv')
 
+print(data_07_10.head(), data_17_20.head())
+print(data_07_10.shape, data_17_20.shape)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
