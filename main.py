@@ -1,15 +1,47 @@
 # Importing necessary packages
-
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib as plt
+from urllib.request import urlretrieve
+from kaggle.api.kaggle_api_extended import KaggleApi
+api = KaggleApi()
+api.authenticate()
+from zipfile import ZipFile
 
-# Import data and check for integrity
+# Downloading and Importing dataset from Kaggle using API (zip)
+api.dataset_download_files('olistbr/brazilian-ecommerce')
 
-data_07_10 = pd.read_csv('Air_Traffic_Passenger_Statistics_07-10.csv')
-data_17_20 = pd.read_csv('Air_Traffic_Passenger_Statistics_17-20.csv')
+# Extracting dataset zip file
+zf = ZipFile('brazilian-ecommerce.zip')
+zf.extractall()
+zf.close()
 
-print(data_07_10.head(), data_17_20.head())
-print(data_07_10.shape, data_17_20.shape)
+# Reading necessary files into DataFrames and printing its head and shape check data is valid
+orders_df =  pd.read_csv('olist_orders_dataset.csv')
+customers_df =  pd.read_csv('olist_customers_dataset.csv')
+
+print(orders_df.head(), customers_df.head())
+print(orders_df.shape, customers_df.shape)
+
+# Setting and sorting index of both dataframes to the files to use when merging/joining: customer_id
+orders_df_indsort = orders_df.set_index('customer_id').sort_index()
+customers_df_indsort= customers_df.set_index('customer_id').sort_index()
+
+# Merging both dataframes into one: olist_df
+olist_df = orders_df_indsort.merge(customers_df_indsort, on='customer_id')
+
+# Checking for missing and duplicate values
+# Printing count of missing values and duplicate rows to verify
+olist_df_missing = pd.isnull(olist_df).sum()
+olist_df_duplicates = olist_df.duplicated().sum()
+
+print(olist_df_missing)
+print(olist_df_duplicates)
+
+# Replacing missing values
+olist_df = olist_df.fillna('Not Available')
+
+# Slicing data, customers from the state of Rio de Janeiro (RJ)
+olist_df_RJ = olist_df.loc[olist_df['customer_state'] == 'RJ']
 
