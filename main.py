@@ -2,9 +2,8 @@
 from zipfile import ZipFile
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib as plt
-from urllib.request import urlretrieve
+from collections import Counter
+import matplotlib.pyplot as plt
 from kaggle.api.kaggle_api_extended import KaggleApi
 api = KaggleApi()
 api.authenticate()
@@ -49,7 +48,7 @@ olist_df_RJ = olist_df.loc[olist_df['customer_state'] == 'RJ']
 for val in olist_df:
     print(val)
 
-# Reset index in case visualisation errors
+# Reset index in case of visualisation errors
 # olist_df = olist_df.reset_index()
 # print(olist_df.head())
 
@@ -57,7 +56,97 @@ for val in olist_df:
 for index, row in olist_df.iterrows():
     print('Status of Order ID ' + row['order_id'] + ', delivered to ' + row['customer_city']
           + ', ' + row['customer_state'] + ' = ' + row['order_status'])
-    # adding a break to prevent for loop to run over the whole dataframe (prevent memory issues)
+    # adding a break to prevent for loop to run over the whole dataframe
     break
 
-#
+# Converting columns with dates to datetime data type to allow analysis of date and time using functions
+olist_df['order_purchase_timestamp'] = pd.to_datetime(olist_df['order_purchase_timestamp'])
+olist_df['order_estimated_delivery_date'] = pd.to_datetime(olist_df['order_estimated_delivery_date'])
+
+# Calculation of time between order and estimated delivery dates
+olist_df['order_time_days'] = olist_df['order_estimated_delivery_date'] - olist_df['order_purchase_timestamp']
+
+# Convert time between orders to weeks
+olist_df['order_time_weeks'] = olist_df.order_time_days / np.timedelta64(1, 'W')
+
+print(olist_df.head())
+print(olist_df.dtypes)
+
+# Creating lists from the city and state columns, and order status for easier visualisations
+olist_citylist = olist_df['customer_city'].tolist()
+print(Counter(olist_citylist))
+olist_statelist = olist_df['customer_state'].tolist()
+print(Counter(olist_statelist))
+olist_statuslist = olist_df['order_status'].tolist()
+print(Counter(olist_statuslist))
+
+# Using numpy to calculate mean, median of time in weeks between order and estimated delivery dates
+# mean value
+mean = np.mean(olist_df['order_time_weeks'])
+# median value
+median = np.median(olist_df['order_time_weeks'])
+print("Mean: ", mean)
+print("Median: ", median)
+
+# Plotting 'customer_state' variable in a bar chart
+labels, values = zip(*Counter(olist_statelist).items())
+indexes = np.arange(len(labels))
+width = 1
+
+plt.bar(indexes, values)
+plt.xticks(indexes, labels)
+plt.xlabel('State')
+plt.ylabel('Number of Orders')
+plt.title('Orders by State')
+plt.show()
+
+# Plotting average and median delivery time per state variable in a bar chart
+# Grouping averages by state
+olist_df_stateavg = olist_df.groupby(['customer_state'])['order_time_weeks'].mean().reset_index()
+
+# Plotting bar chart
+plt.bar(olist_df_stateavg['customer_state'], olist_df_stateavg['order_time_weeks'])
+plt.xlabel('State')
+plt.ylabel('Weeks')
+plt.title('Order Time by State')
+plt.show()
+
+# Plotting same bar chart with horizontal lines to compare state and country means and country median
+plt.bar(olist_df_stateavg['customer_state'], olist_df_stateavg['order_time_weeks'])
+plt.axhline(y=3.395378560731207, color='r', linestyle='-', label='Country avg')
+plt.axhline(y=3.32005291005291, color='y', linestyle='-', label='Country median')
+plt.xlabel('State')
+plt.ylabel('Weeks')
+plt.yticks([0, 1, 2, 3, 3.32005291005291, 3.395378560731207, 4, 5, 6, 7])
+plt.title('Order Time by State')
+plt.legend()
+plt.show()
+
+# Ploting order status
+labels, values = zip(*Counter(olist_statuslist).items())
+indexes = np.arange(len(labels))
+
+plt.bar(indexes, values)
+plt.xticks(indexes, labels)
+plt.xlabel('Status')
+plt.ylabel('Number')
+plt.title('Order Status')
+plt.show()
+
+# Filtering and undelivered orders using reusable function
+def remove_values_from_list(the_list, val):
+    return [value for value in the_list if value != val]
+
+
+olist_statusundelivered = remove_values_from_list(olist_statuslist, 'delivered')
+
+# Plotting undelivered orders
+labels, values = zip(*Counter(olist_statusundelivered).items())
+indexes = np.arange(len(labels))
+
+plt.bar(indexes, values)
+plt.xticks(indexes, labels)
+plt.xlabel('Status')
+plt.ylabel('Number')
+plt.title('Order Status')
+plt.show()
