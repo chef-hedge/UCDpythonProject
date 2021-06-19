@@ -11,9 +11,13 @@ api.authenticate()
 # Downloading and Importing dataset from Kaggle using API (zip)
 api.dataset_download_files('olistbr/brazilian-ecommerce')
 
-# Extracting dataset zip file
+# Listing files contained in the dataset
 zf = ZipFile('brazilian-ecommerce.zip')
-zf.extractall()
+print(zf.namelist())
+
+# Extracting the necessary dataset files
+zf.extract('olist_orders_dataset.csv')
+zf.extract('olist_customers_dataset.csv')
 zf.close()
 
 # Reading necessary files into DataFrames and printing its head and shape check data is valid
@@ -44,13 +48,12 @@ olist_df = olist_df.fillna('Not Available')
 # Slicing data, customers from the state of Rio de Janeiro (RJ)
 olist_df_RJ = olist_df.loc[olist_df['customer_state'] == 'RJ']
 
+# Exporting sliced Dataframe to CSV
+olist_df_RJ.to_csv('olist_df_RJ.csv')
+
 # For loop to list column names
 for val in olist_df:
     print(val)
-
-# Reset index in case of visualisation errors
-# olist_df = olist_df.reset_index()
-# print(olist_df.head())
 
 # Iterrows over olist_df to produce a meaningful description of order ID and its delivery location and status
 for index, row in olist_df.iterrows():
@@ -59,7 +62,7 @@ for index, row in olist_df.iterrows():
     # adding a break to prevent for loop to run over the whole dataframe
     break
 
-# Converting columns with dates to datetime data type to allow analysis of date and time using functions
+# Converting columns with dates to datetime data type to allow analysis of date and time
 olist_df['order_purchase_timestamp'] = pd.to_datetime(olist_df['order_purchase_timestamp'])
 olist_df['order_estimated_delivery_date'] = pd.to_datetime(olist_df['order_estimated_delivery_date'])
 
