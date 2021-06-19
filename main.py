@@ -66,11 +66,13 @@ for index, row in olist_df.iterrows():
 olist_df['order_purchase_timestamp'] = pd.to_datetime(olist_df['order_purchase_timestamp'])
 olist_df['order_estimated_delivery_date'] = pd.to_datetime(olist_df['order_estimated_delivery_date'])
 
-# Calculation of time between order and estimated delivery dates
+# Calculation of time between order and estimated delivery dates in days
 olist_df['order_time_days'] = olist_df['order_estimated_delivery_date'] - olist_df['order_purchase_timestamp']
+olist_df['order_time_days'] = olist_df.order_time_days / np.timedelta64(1, 'D')
 
-# Convert time between orders to weeks
-olist_df['order_time_weeks'] = olist_df.order_time_days / np.timedelta64(1, 'W')
+# Calculation of time between order and estimated delivery dates in weeks
+olist_df['order_time_weeks'] = olist_df['order_estimated_delivery_date'] - olist_df['order_purchase_timestamp']
+olist_df['order_time_weeks'] = olist_df.order_time_weeks / np.timedelta64(1, 'W')
 
 print(olist_df.head())
 print(olist_df.dtypes)
