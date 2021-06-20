@@ -76,6 +76,8 @@ olist_df['order_time_weeks'] = olist_df.order_time_weeks / np.timedelta64(1, 'W'
 
 print(olist_df.head())
 print(olist_df.dtypes)
+olist_df.to_csv('olist_df.csv')
+
 
 # Creating lists from the city and state columns, and order status for easier visualisations
 olist_citylist = olist_df['customer_city'].tolist()
@@ -93,7 +95,7 @@ median = np.median(olist_df['order_time_weeks'])
 print("Mean: ", mean)
 print("Median: ", median)
 
-# Plotting 'customer_state' variable in a bar chart
+# Plotting number of orders per 'customer_state' variable in a bar chart
 labels, values = zip(*Counter(olist_statelist).items())
 indexes = np.arange(len(labels))
 width = 1
@@ -105,7 +107,7 @@ plt.ylabel('Number of Orders')
 plt.title('Orders by State')
 plt.show()
 
-# Plotting average and median delivery time per state variable in a bar chart
+# Plotting average delivery time per state variable in a bar chart
 # Grouping averages by state
 olist_df_stateavg = olist_df.groupby(['customer_state'])['order_time_weeks'].mean().reset_index()
 
